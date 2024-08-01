@@ -4,6 +4,7 @@ This is a simple emulator for the 6502 microprocessor clock/timer using the Rasp
 
 ## Requirements
 - ARM toolchain
+- GCC
 - CMake
 - Raspberry PI Pico SDK
 
