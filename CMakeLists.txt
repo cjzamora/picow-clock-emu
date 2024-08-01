@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 
 # set project name
-set(PROJECT pico_timer)
+set(PROJECT picow_timer_emu)
 # set pico board
 set(PICO_BOARD pico_w)
 
