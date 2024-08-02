@@ -1,6 +1,6 @@
 # Raspberry PI Pico W 6502 microprocessor clock/timer emulator
 
-This is a simple emulator for the 6502 microprocessor clock/timer using the Raspberry PI Pico W. It can do Astable and Monostable modes.
+This is a simple clock/timer emulator for the 6502 microprocessor using the Raspberry PI Pico W. The emulator can be used to test the 6502 microprocessor with a clock frequency of up to 1Khz. This is useful for testing the 6502 microprocessor without the need for a physical clock/timer chip (e.g. 555 timer).
 
 ## Requirements
 - ARM toolchain
