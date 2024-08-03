@@ -16,8 +16,10 @@ const uint POTENTIOMETER_PIN = 26;
 const uint MODE_PIN = 14;
 // GPIO pin for STEP button
 const uint STEP_PIN = 15;
+// GPIO pin for PULSE output (led)
+const uint PULSE_PIN = 16;
 // GPIO pin for CLOCK output
-const uint CLOCK_PIN = 16;
+const uint CLOCK_PIN = 28;
 
 // define frequency in Hz
 volatile int frequency = 1;
@@ -112,11 +114,13 @@ int main()
     // init GPIOs
     gpio_init(MODE_PIN);
     gpio_init(STEP_PIN);
+    gpio_init(PULSE_PIN);
     gpio_init(CLOCK_PIN);
 
     // set GPIO mode
     gpio_set_dir(MODE_PIN, GPIO_IN);
     gpio_set_dir(STEP_PIN, GPIO_IN);
+    gpio_set_dir(PULSE_PIN, GPIO_OUT);
     gpio_set_dir(CLOCK_PIN, GPIO_OUT);
 
     // set GPIO pull-up
@@ -139,8 +143,13 @@ int main()
        if (pulse) {
             printf("Mode: %d, Freq: %dhz, Duty: %d, High: %d, Low: %d\n", mode, frequency, duty_cycle, high_time, low_time); 
 
+            // high
             gpio_put(CLOCK_PIN, 1);
+            gpio_put(PULSE_PIN, 1);
             sleep_ms(high_time);
+
+            // low
+            gpio_put(PULSE_PIN, 0);
             gpio_put(CLOCK_PIN, 0);
 
             // low time for astable mode only

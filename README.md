@@ -12,7 +12,8 @@ This is a simple clock/timer emulator for the 6502 microprocessor using the Rasp
 
 - PIN 14: Mode PIN (Astable/Monostable)
 - PIN 15: Step PIN (Clock can be stepped when in Monostable mode)
-- PIN 16: Output PIN (Output of the clock/timer)
+- PIN 16: Pulse PIN (Output of the clock/timer, used for LED)
+- PIN 28: Clock Output PIN (Output of the clock/timer)
 - PIN 26: Potentiometer (For adjusting the frequency of the clock/timer)
 
 ## Building and Flashing
@@ -23,4 +24,4 @@ This is a simple clock/timer emulator for the 6502 microprocessor using the Rasp
 Make sure that the Pico is in BOOTSEL mode before running the script.
 
 ## Connecting to 6502
-- Connect the Output PIN (PIN 16) of PI Pico to the PHI2 pin of the 6502 microprocessor.
+- Connect the Clock Output PIN (PIN 28) of PI Pico to the PHI2 pin of the 6502 microprocessor.
