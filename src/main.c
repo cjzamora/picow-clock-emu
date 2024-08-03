@@ -37,7 +37,8 @@ volatile uint32_t last_interrupt_ms = 0;
  *
  * @return void
  */
-void handle_button_interrupt(uint gpio, uint32_t events) {
+void handle_button_interrupt(uint gpio, uint32_t events) 
+{
     // get current time in ms
     uint32_t now = to_ms_since_boot(get_absolute_time());
 
@@ -66,7 +67,8 @@ void handle_button_interrupt(uint gpio, uint32_t events) {
  * 
  * @return void
  */
-void start_adc() {
+void start_adc() 
+{
     // initialize adc
     adc_init();
     // init adc GPIO
@@ -77,20 +79,27 @@ void start_adc() {
     while(true) {
         // read adc value
         uint16_t raw = adc_read();
-        // map the raw value to the range 1-1000
-        int converted = (raw * 999 / 4095) + 1;
 
-        if (converted <= 5) {
-            frequency = 1;
-        } else {
-            frequency = converted;
+        // capture 64 samples to avoid noise
+        int samples = 64;
+        int sum = 0;
+        for (int i = 0; i < samples; i++) {
+            sum += adc_read();
+            sleep_ms(10);
         }
+
+        sum = sum / samples;
+        sum = (sum * 999 / 4095) + 1;
+
+        // update frequency
+        frequency = sum;
 
         sleep_ms(1000);
     }
 }
 
-int main() {
+int main() 
+{
     // initialize stdio
     stdio_init_all();
 
