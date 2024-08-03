@@ -90,6 +90,7 @@ void start_adc()
             sleep_ms(10);
         }
 
+        // calculate average
         sum = sum / samples;
         sum = (sum * 999 / 4095) + 1;
 
