@@ -17,6 +17,12 @@ pico_sdk_init()
 # add the executable
 add_executable(${PROJECT} src/main.c)
 
+# add compile definitions
+add_compile_definitions(
+    CLOCK_FREQ=0
+    CLOCK_DEBUG=1
+)
+
 # add target link libraries
 target_link_libraries(
     ${PROJECT}

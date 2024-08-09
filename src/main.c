@@ -132,33 +132,55 @@ int main()
     gpio_set_irq_enabled_with_callback(MODE_PIN, GPIO_IRQ_EDGE_FALL, true, &handle_button_interrupt);
     gpio_set_irq_enabled_with_callback(STEP_PIN, GPIO_IRQ_EDGE_FALL, true, &handle_button_interrupt);
 
-    // put analog pin reading on core 1
-    multicore_launch_core1(start_adc);
+    // if CLOCK_FREQ is defined
+    if (CLOCK_FREQ && CLOCK_FREQ > 0) {
+        // set frequency
+        frequency = CLOCK_FREQ;
+    } else {
+        // put analog pin reading on core 1
+        multicore_launch_core1(start_adc);
+    }
+
+    // wait for core 1 to start
+    sleep_ms(1000);
 
     while(true) {
+        // if not pulse
+        if (!pulse) {
+            continue;
+        }
+
         // calculate high/low time in ms
         int sleep_in_ms = 1000 / frequency;
         int high_time = sleep_in_ms * duty_cycle / 100;
         int low_time = sleep_in_ms - high_time;
 
-       if (pulse) {
-            printf("Mode: %d, Freq: %dhz, Duty: %d, High: %d, Low: %d\n", mode, frequency, duty_cycle, high_time, low_time); 
+        // if debug mode
+        if (CLOCK_DEBUG) {
+            printf(
+                "Mode: %d, Freq: %dhz, Duty: %d, High: %d, Low: %d\n", 
+                mode, 
+                frequency, 
+                duty_cycle, 
+                high_time, 
+                low_time
+            ); 
+        }
 
-            // high
-            gpio_put(CLOCK_PIN, 1);
-            gpio_put(PULSE_PIN, 1);
-            sleep_ms(high_time);
+        // high
+        gpio_put(CLOCK_PIN, 1);
+        gpio_put(PULSE_PIN, 1);
+        sleep_ms(high_time);
 
-            // low
-            gpio_put(PULSE_PIN, 0);
-            gpio_put(CLOCK_PIN, 0);
+        // low
+        gpio_put(PULSE_PIN, 0);
+        gpio_put(CLOCK_PIN, 0);
 
-            // low time for astable mode only
-            if (mode == ASTABLE) {
-                sleep_ms(low_time);
-            } else {
-                pulse = false;
-            }
-       }
+        // low time for astable mode only
+        if (mode == ASTABLE) {
+            sleep_ms(low_time);
+        } else {
+            pulse = false;
+        }
     }
 }
