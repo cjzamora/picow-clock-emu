@@ -2,6 +2,7 @@
 #include "pico/cyw43_arch.h"
 #include "hardware/adc.h"
 #include "pico/multicore.h"
+#include "hardware/pwm.h"
 
 // define modes
 #define ASTABLE   0
@@ -95,7 +96,8 @@ void start_adc()
         sum = (sum * 999 / 4095) + 1;
 
         // update frequency
-        frequency = sum;
+        // frequency = sum;
+        frequency = 1000000;
 
         sleep_ms(1000);
     }
@@ -112,75 +114,103 @@ int main()
         return -1;
     }
 
-    // init GPIOs
-    gpio_init(MODE_PIN);
-    gpio_init(STEP_PIN);
-    gpio_init(PULSE_PIN);
-    gpio_init(CLOCK_PIN);
+    // // init GPIOs
+    // gpio_init(MODE_PIN);
+    // gpio_init(STEP_PIN);
+    // gpio_init(PULSE_PIN);
+    // gpio_init(CLOCK_PIN);
 
-    // set GPIO mode
-    gpio_set_dir(MODE_PIN, GPIO_IN);
-    gpio_set_dir(STEP_PIN, GPIO_IN);
-    gpio_set_dir(PULSE_PIN, GPIO_OUT);
-    gpio_set_dir(CLOCK_PIN, GPIO_OUT);
+    // // set GPIO mode
+    // gpio_set_dir(MODE_PIN, GPIO_IN);
+    // gpio_set_dir(STEP_PIN, GPIO_IN);
+    // gpio_set_dir(PULSE_PIN, GPIO_OUT);
+    // gpio_set_dir(CLOCK_PIN, GPIO_OUT);
 
-    // set GPIO pull-up
-    gpio_pull_up(MODE_PIN);
-    gpio_pull_up(STEP_PIN);
+    // // set GPIO pull-up
+    // gpio_pull_up(MODE_PIN);
+    // gpio_pull_up(STEP_PIN);
 
-    // set GPIO IRQ
-    gpio_set_irq_enabled_with_callback(MODE_PIN, GPIO_IRQ_EDGE_FALL, true, &handle_button_interrupt);
-    gpio_set_irq_enabled_with_callback(STEP_PIN, GPIO_IRQ_EDGE_FALL, true, &handle_button_interrupt);
+    // // set GPIO IRQ
+    // gpio_set_irq_enabled_with_callback(MODE_PIN, GPIO_IRQ_EDGE_FALL, true, &handle_button_interrupt);
+    // gpio_set_irq_enabled_with_callback(STEP_PIN, GPIO_IRQ_EDGE_FALL, true, &handle_button_interrupt);
 
-    // if CLOCK_FREQ is defined
-    if (CLOCK_FREQ && CLOCK_FREQ > 0) {
-        // set frequency
-        frequency = CLOCK_FREQ;
-    } else {
-        // put analog pin reading on core 1
-        multicore_launch_core1(start_adc);
-    }
+    // // if CLOCK_FREQ is defined
+    // if (CLOCK_FREQ && CLOCK_FREQ > 0) {
+    //     // set frequency
+    //     frequency = CLOCK_FREQ;
+    // } else {
+    //     // put analog pin reading on core 1
+    //     multicore_launch_core1(start_adc);
+    // }
 
     // wait for core 1 to start
     sleep_ms(1000);
 
+    const int PIN = 4;
+
+    // Initialize the GPIO pin
+    gpio_set_function(PIN, GPIO_FUNC_PWM);
+    // Get the slice number for the PWM pin
+    uint slice_num = pwm_gpio_to_slice_num(PIN);
+    // Get the channel number for the PWM pin
+    uint channel = pwm_gpio_to_channel(PIN);
+
+    // calculate clkdiv and wrap for 500khz
+    uint32_t clkdiv = 16;
+
+
+    // 125000000 / 16 = 7812500
+    pwm_set_clkdiv(slice_num, 16.0f);
+    // 7812500 / 1000 = 7812 (cycles)
+    pwm_set_wrap(slice_num, 10000);
+
+    pwm_set_chan_level(slice_num, channel, 5000);
+    pwm_set_enabled(slice_num, true);
+
     while(true) {
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+        sleep_ms(500);
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
+        sleep_ms(500);
+
         // if not pulse
-        if (!pulse) {
-            continue;
-        }
+        // if (!pulse) {
+        //     continue;
+        // }
 
         // calculate high/low time in ms
-        int sleep_in_ms = 1000 / frequency;
-        int high_time = sleep_in_ms * duty_cycle / 100;
-        int low_time = sleep_in_ms - high_time;
+        // int sleep_in_ms = 1000 / frequency;
+        // int high_time = sleep_in_ms * duty_cycle / 100;
+        // int low_time = sleep_in_ms - high_time;
 
         // if debug mode
-        if (CLOCK_DEBUG) {
-            printf(
-                "Mode: %d, Freq: %dhz, Duty: %d, High: %d, Low: %d\n", 
-                mode, 
-                frequency, 
-                duty_cycle, 
-                high_time, 
-                low_time
-            ); 
-        }
+        // if (CLOCK_DEBUG) {
+        //     printf(
+        //         "Mode: %d, Freq: %dhz, Duty: %d, High: %d, Low: %d\n", 
+        //         mode, 
+        //         frequency, 
+        //         duty_cycle, 
+        //         high_time, 
+        //         low_time
+        //     ); 
+        // }
 
-        // high
-        gpio_put(CLOCK_PIN, 1);
-        gpio_put(PULSE_PIN, 1);
-        sleep_ms(high_time);
+        // // high
+        // gpio_put(CLOCK_PIN, 1);
+        // gpio_put(PULSE_PIN, 1);
+        // sleep_ms(high_time);
 
-        // low
-        gpio_put(PULSE_PIN, 0);
-        gpio_put(CLOCK_PIN, 0);
+        // // low
+        // gpio_put(PULSE_PIN, 0);
+        // gpio_put(CLOCK_PIN, 0);
 
-        // low time for astable mode only
-        if (mode == ASTABLE) {
-            sleep_ms(low_time);
-        } else {
-            pulse = false;
-        }
+        // // low time for astable mode only
+        // if (mode == ASTABLE) {
+        //     sleep_ms(low_time);
+        // } else {
+        //     pulse = false;
+        // }
+
+        // clock_freq++;
     }
 }

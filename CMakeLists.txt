@@ -30,6 +30,7 @@ target_link_libraries(
     pico_multicore
     pico_cyw43_arch_none
     hardware_adc
+    hardware_pwm
 )
 
 # create map/bin/hex file etc.
