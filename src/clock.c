@@ -147,6 +147,10 @@ void clock_set_freq_hz(u_int32_t hz)
 {
     clock_freq_hz = hz;
 
+    if (!clock_started) {
+        return;
+    }
+
     clock_stop_pwm();
     clock_stop_rpt();
 

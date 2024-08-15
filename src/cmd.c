@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "pico/bootrom.h"
 #include "pico/stdlib.h"
 #include "cmd.h"
 #include "clock.h"
@@ -101,6 +102,7 @@ void cmd_help()
         "step\t\tsteps the clock timer\n"
         "freq <hz>\tsets the clock frequency\n"
         "reset\t\tresets the clock timer\n"
+        "reboot\t\treboots the pico\n"
         "clear\t\tclears the screen\n"
         "\n"
     );
@@ -146,6 +148,8 @@ void cmd_execute(char *cmd)
     } else if (strcmp(cmd, "reset") == 0) {
         clock_reset();
         cmd_boot_message();
+    } else if (strcmp(cmd, "reboot") == 0) {
+        reset_usb_boot(0, 0);
     } else if (strcmp(cmd, "clear") == 0) {
         printf("\033[2J\033[1;1H");
         cmd_boot_message();
