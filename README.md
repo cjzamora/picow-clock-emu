@@ -1,4 +1,4 @@
-# Raspberry PI Pico(W) - 6502 Clock/Timer Emulator
+# Raspberry PI Pico(W) - 6502 clock/timer emulator
 
 An interactive clock/timer emulator for the 6502 microprocessor using repeating timer and pulse width modulation. This emulator can generate clock signals from `1Hz` to `125MHz`.
 
