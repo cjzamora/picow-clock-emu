@@ -15,12 +15,16 @@ project(${PROJECT} C CXX ASM)
 pico_sdk_init()
 
 # add the executable
-add_executable(${PROJECT} src/main.c)
+add_executable(
+    ${PROJECT} 
+    src/main.c
+    src/clock.c
+    src/cmd.c
+)
 
 # add compile definitions
 add_compile_definitions(
-    CLOCK_FREQ=0
-    CLOCK_DEBUG=1
+    CLOCK_DEF_FREQ_HZ=1
 )
 
 # add target link libraries
@@ -29,9 +33,11 @@ target_link_libraries(
     pico_stdlib
     pico_multicore
     pico_cyw43_arch_none
-    hardware_adc
     hardware_pwm
 )
+
+# add compile options
+target_compile_options(${PROJECT} PRIVATE -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-variable)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(${PROJECT})

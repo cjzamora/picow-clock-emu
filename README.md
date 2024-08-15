@@ -1,6 +1,6 @@
-# Raspberry PI Pico W 6502 microprocessor clock/timer emulator
+# Raspberry PI Pico(W) - 6502 Clock/Timer Emulator
 
-This is a simple clock/timer emulator for the 6502 microprocessor using the Raspberry PI Pico W. The emulator can be used to test the 6502 microprocessor with a clock frequency of up to `1Khz` (if using the potentiometer ADC pin) and `8Mhz` if setting the clock frequency using the `CLOCK_FREQ` definition in `CMakeLists.txt`. This is useful for testing the 6502 microprocessor without the need for a physical clock/timer chip (e.g. 555 timer/clock oscillator).
+An interactive clock/timer emulator for the 6502 microprocessor using repeating timer and pulse width modulation. This emulator can generate clock signals from `1Hz` to `125MHz`.
 
 ## Requirements
 - ARM toolchain
@@ -10,11 +10,8 @@ This is a simple clock/timer emulator for the 6502 microprocessor using the Rasp
 
 ## GPIO Assignments
 
-- PIN 14: Mode PIN (Astable/Monostable)
-- PIN 15: Step PIN (Clock can be stepped when in Monostable mode)
-- PIN 16: Pulse PIN (Output of the clock/timer, used for LED)
-- PIN 28: Clock Output PIN (Output of the clock/timer)
-- PIN 26: Potentiometer (For adjusting the frequency of the clock/timer)
+- GPIO 16 - Pulse PIN for LEDs
+- GPIO 17 - Clock PIN for 6502
 
 ## Building and Flashing
 ```bash
@@ -23,10 +20,31 @@ This is a simple clock/timer emulator for the 6502 microprocessor using the Rasp
 
 Make sure that the Pico is in BOOTSEL mode before running the script.
 
+## Connecting to the interactive terminal
+Connecting to the terminal using `minicom`:
+
+```bash
+minicom -b 115200  -D <serial_port>
+```
+
+Once connected, you should see the following prompt:
+
+```
+Pico Clock/Timer Emulator
+
+Sys Clock:              125000000Hz
+Out Clock:              1Hz
+Timer:                  RPT
+Duty Cycle:             50%
+
+Type '?' for help
+
+>>>
+```
+
+Feel free to explore the commands by typing `?` and pressing enter. There are two types of clock generation modes:
+- `RPT` - Repeating Timer Mode used to generate clock frequencies from `1Hz` to `9Hz`
+- `PWM` - Pulse Width Modulation Mode used to generate clock frequencies from `10Hz` to `125MHz`
+
 ## Connecting to 6502
-- Connect the Clock Output PIN (PIN 28) of PI Pico to the PHI2 pin of the 6502 microprocessor.
-
-## Frequencies more than 1Khz
-If you want to generate clock frequencies more than `1Khz`, you can adjust the `CLOCK_FREQ` in the `CMakeLists.txt` file. Note that the ADC pin for the potentiometer will not work anymore. The clock frequency will be fixed to the value of `CLOCK_FREQ`.
-
-The `CLOCK_FREQ` is defined in `HZ` and can be set to any value up to `8000000` or `8Mhz`.
+- Connect the CLock PIN to the PHI2 pin of the 6502.
