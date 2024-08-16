@@ -113,7 +113,7 @@ void cmd_help()
         "step\t\tsteps the clock timer\n"
         "freq <hz>\tsets the clock frequency\n"
         "reset\t\tresets the clock timer\n"
-        "reboot\t\treboots the pico\n"
+        "reboot\t\treboots the pico to BOOTSEL mode\n"
         "clear\t\tclears the screen\n"
         "\n"
     );
@@ -176,7 +176,7 @@ void cmd_execute(char *cmd)
         if (clock_get_mode()) {
             clock_step_pulse();
         } else {
-            printf("unknown command\n");
+            printf("Unknown command\n");
         }
     }
     
