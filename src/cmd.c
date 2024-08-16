@@ -164,7 +164,7 @@ void cmd_execute(char *cmd)
         clock_reset();
         cmd_boot_message();
     } else if (strcmp(cmd, "reboot") == 0) {
-        printf("* Rebooting\n");
+        printf("* Rebooting to BOOTSEL mode\n");
         reset_usb_boot(0, 0);
     } else if (strcmp(cmd, "clear") == 0) {
         printf("\033[2J\033[1;1H");
