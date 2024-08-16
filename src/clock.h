@@ -1,6 +1,16 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
+#ifndef CLOCK_DEF_FREQ_HZ
+#define CLOCK_DEF_FREQ_HZ 1
+#endif
+
+#define CLOCK_ASTABLE 0
+#define CLOCK_MONOSTABLE 1
+
+#define CLOCK_TIMER_RPT 0
+#define CLOCK_TIMER_PWM 1
+
 uint8_t clock_get_mode();
 
 /**

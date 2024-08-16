@@ -7,10 +7,6 @@
 #include "hardware/pwm.h"
 #include "clock.h"
 
-#ifndef CLOCK_DEF_FREQ_HZ
-#define CLOCK_DEF_FREQ_HZ 1
-#endif
-
 /**
  * Pulse GPIO pin
  * 
@@ -202,7 +198,7 @@ void clock_start_pwm()
     clock_set_pwm(pwm_gpio_to_slice_num(PULSE_PIN), pwm_gpio_to_channel(PULSE_PIN));
     clock_set_pwm(pwm_gpio_to_slice_num(CLOCK_PIN), pwm_gpio_to_channel(CLOCK_PIN));
 
-    clock_timer_type = 1;
+    clock_timer_type = CLOCK_TIMER_PWM;
 }
 
 /**
@@ -231,7 +227,7 @@ bool clock_rpt_timer_callback(struct repeating_timer *t)
         gpio_put(CLOCK_PIN, 1);
         gpio_put(PULSE_PIN, 1);
 
-        if (clock_mode) {
+        if (clock_mode == CLOCK_MONOSTABLE) {
             return false;
         }
     } else {
@@ -256,13 +252,13 @@ void clock_start_rpt()
     gpio_set_dir(PULSE_PIN, GPIO_OUT);
 
     int ms = 1000 / clock_freq_hz;
-    if (clock_mode) {
+    if (clock_mode == CLOCK_MONOSTABLE) {
         ms = 50;
     }
 
     add_repeating_timer_ms(ms, clock_rpt_timer_callback, NULL, &clock_timer);
 
-    clock_timer_type = 0;
+    clock_timer_type = CLOCK_TIMER_RPT;
 }
 
 /**
@@ -317,10 +313,10 @@ void clock_pulse_stop()
 void clock_step(bool enable)
 {
     if (enable) {
-        clock_mode = 1;
+        clock_mode = CLOCK_MONOSTABLE;
         clock_pulse_stop();
     } else {
-        clock_mode = 0;
+        clock_mode = CLOCK_ASTABLE;
         clock_pulse_start();
     }
 }
@@ -346,8 +342,7 @@ void clock_reset()
     clock_freq_hz = CLOCK_DEF_FREQ_HZ;
     clock_pwm_div = 0;
     clock_pwm_wrap = 0;
-    clock_duty_cycle = 50;
-    clock_timer_type = 0;
+    clock_timer_type = CLOCK_ASTABLE;
 
     clock_stop_pwm();
     clock_stop_rpt();

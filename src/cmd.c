@@ -59,15 +59,17 @@ void cmd_info()
     u_int8_t timer_type = clock_get_timer_type();
     u_int8_t mode = clock_get_mode();
 
+    // determine timer type
     char timer_type_str[4];
-    if (timer_type) {
+    if (timer_type == CLOCK_TIMER_PWM) {
         strcpy(timer_type_str, "PWM");
     } else {
         strcpy(timer_type_str, "RPT");
-    }
+    }   
 
+    // determine mode
     char mode_str[16];
-    if (mode) {
+    if (mode == CLOCK_MONOSTABLE) {
         strcpy(mode_str, "Monostable");
     } else {
         strcpy(mode_str, "Astable");
@@ -142,38 +144,55 @@ void cmd_execute(char *cmd)
 
     char *step_message = "* Monostable mode press `enter` to step and type `exit` and hit enter to go back to Astable mode\n";
 
+    // help command
     if (strcmp(cmd, "?") == 0) {
         cmd_help();
+
+    // start command
     } else if (strcmp(cmd, "start") == 0) {
-        clock_pulse_start();
         printf("* Clock started\n");
+        clock_pulse_start();
+
+    // stop command
     } else if (strcmp(cmd, "stop") == 0) {
-        clock_pulse_stop();
         printf("* Clock stopped\n");
+        clock_pulse_stop();
+
+    // step command
     } else if (strcmp(cmd, "step") == 0) {
         clock_step(true);
         printf(step_message);
         cmd_info();
+
+    // freq command
     } else if (strncmp(cmd, "freq", 4) == 0) {
         char *freq = cmd + 5;
         u_int32_t hz = atoi(freq);
 
         clock_set_freq_hz(hz);
         cmd_info();
+
+    // reset command
     } else if (strcmp(cmd, "reset") == 0) {
         clock_reset();
         cmd_boot_message();
+
+    // reboot command
     } else if (strcmp(cmd, "reboot") == 0) {
         printf("* Rebooting to BOOTSEL mode\n");
         reset_usb_boot(0, 0);
+
+    // clear command
     } else if (strcmp(cmd, "clear") == 0) {
-        printf("\033[2J\033[1;1H");
         cmd_boot_message();
-    } else if (strcmp(cmd, "exit") == 0 && clock_get_mode()) {
+
+    // exit step mode command
+    } else if (strcmp(cmd, "exit") == 0 && clock_get_mode() == CLOCK_MONOSTABLE) {
         clock_step(false);
         cmd_info();
     } else {
-        if (clock_get_mode()) {
+        // if in step mode
+        if (clock_get_mode() == CLOCK_MONOSTABLE) {
             clock_step_pulse();
         } else {
             printf("Unknown command\n");
