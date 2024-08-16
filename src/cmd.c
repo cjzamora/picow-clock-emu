@@ -37,7 +37,7 @@ cmd_data_t *cmd_data;
 void cmd_boot_message()
 {
     printf("\033[2J\033[1;1H");
-    printf("\033[1mPico Clock/Timer Emulator\033[0m\n\n");
+    printf("\033[1mPico Clock/Timer Emulator\033[0m\n");
 
     cmd_info();
 
@@ -74,6 +74,7 @@ void cmd_info()
     }
 
     printf(
+        "\n"
         "Sys Clock:\t\t%luHz\n"
         "Out Clock:\t\t%luHz\n"
         "Mode:\t\t\t%s\n"
@@ -139,16 +140,16 @@ void cmd_execute(char *cmd)
     // stop command timer
     cmd_stop();
 
-    char *step_message = "monostable mode press `enter` to step and type `exit` and hit enter to stop...\n\n";
+    char *step_message = "* Monostable mode press `enter` to step and type `exit` and hit enter to go back to Astable mode\n";
 
     if (strcmp(cmd, "?") == 0) {
         cmd_help();
     } else if (strcmp(cmd, "start") == 0) {
         clock_pulse_start();
-        printf("clock started\n");
+        printf("* Clock started\n");
     } else if (strcmp(cmd, "stop") == 0) {
         clock_pulse_stop();
-        printf("clock stopped\n");
+        printf("* Clock stopped\n");
     } else if (strcmp(cmd, "step") == 0) {
         clock_step(true);
         printf(step_message);
@@ -158,12 +159,12 @@ void cmd_execute(char *cmd)
         u_int32_t hz = atoi(freq);
 
         clock_set_freq_hz(hz);
-        printf("\n");
         cmd_info();
     } else if (strcmp(cmd, "reset") == 0) {
         clock_reset();
         cmd_boot_message();
     } else if (strcmp(cmd, "reboot") == 0) {
+        printf("* Rebooting\n");
         reset_usb_boot(0, 0);
     } else if (strcmp(cmd, "clear") == 0) {
         printf("\033[2J\033[1;1H");
