@@ -1,6 +1,8 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
+uint8_t clock_get_mode();
+
 /**
  * Clock get system frequency
  * 
@@ -93,6 +95,21 @@ void clock_pulse_start();
  * @return void
  */
 void clock_pulse_stop();
+
+/**
+ * Clock step mode
+ * 
+ * @param bool enable
+ * @return void
+ */
+void clock_step(bool enable);
+
+/**
+ * Clock step pulse
+ * 
+ * @return void
+ */
+void clock_step_pulse();
 
 /**
  * Clock reset

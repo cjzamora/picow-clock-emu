@@ -33,6 +33,16 @@ const int CLOCK_PIN = 17;
 bool clock_started = false;
 
 /**
+ * Clock mode
+ * 
+ * 0 = astable
+ * 1 = monostable
+ * 
+ * @var u_int8_t
+ */
+u_int8_t clock_mode = 0;
+
+/**
  * Clock frequency
  * 
  * @var u_int32_t
@@ -76,6 +86,16 @@ u_int8_t clock_timer_type = 0;
  * @var struct repeating_timer
  */
 struct repeating_timer clock_timer;
+
+/**
+ * Clock get mode
+ * 
+ * @return u_int8_t
+ */
+u_int8_t clock_get_mode()
+{
+    return clock_mode;
+}
 
 /**
  * Clock get system frequency
@@ -147,13 +167,7 @@ void clock_set_freq_hz(u_int32_t hz)
 {
     clock_freq_hz = hz;
 
-    if (!clock_started) {
-        return;
-    }
-
-    clock_stop_pwm();
-    clock_stop_rpt();
-
+    clock_pulse_stop();
     clock_pulse_start();
 }
 
@@ -200,8 +214,6 @@ void clock_stop_pwm()
 {
     pwm_set_enabled(pwm_gpio_to_slice_num(PULSE_PIN), false);
     pwm_set_enabled(pwm_gpio_to_slice_num(CLOCK_PIN), false);
-
-    clock_started = false;
 }
 
 /**
@@ -218,6 +230,10 @@ bool clock_rpt_timer_callback(struct repeating_timer *t)
     if (state) {
         gpio_put(CLOCK_PIN, 1);
         gpio_put(PULSE_PIN, 1);
+
+        if (clock_mode) {
+            return false;
+        }
     } else {
         gpio_put(CLOCK_PIN, 0);
         gpio_put(PULSE_PIN, 0);
@@ -240,6 +256,10 @@ void clock_start_rpt()
     gpio_set_dir(PULSE_PIN, GPIO_OUT);
 
     int ms = 1000 / clock_freq_hz;
+    if (clock_mode) {
+        ms = 50;
+    }
+
     add_repeating_timer_ms(ms, clock_rpt_timer_callback, NULL, &clock_timer);
 
     clock_timer_type = 0;
@@ -253,7 +273,6 @@ void clock_start_rpt()
 void clock_stop_rpt()
 {
     cancel_repeating_timer(&clock_timer);   
-    clock_started = false;
 }
 
 /**
@@ -283,14 +302,37 @@ void clock_pulse_start()
  */
 void clock_pulse_stop()
 {
-    if (!clock_started) {
-        return;
-    }
-
     clock_stop_pwm();
     clock_stop_rpt();
 
     clock_started = false;
+}
+
+/**
+ * Clock step mode
+ * 
+ * @param bool enable
+ * @return void
+ */
+void clock_step(bool enable)
+{
+    if (enable) {
+        clock_mode = 1;
+        clock_pulse_stop();
+    } else {
+        clock_mode = 0;
+        clock_pulse_start();
+    }
+}
+
+/**
+ * Clock pulse step
+ * 
+ * @return void
+ */
+void clock_step_pulse()
+{
+    clock_start_rpt();
 }
 
 /**

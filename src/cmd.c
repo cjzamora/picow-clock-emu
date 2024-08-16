@@ -57,6 +57,7 @@ void cmd_info()
     u_int16_t pwm_wrap = clock_get_pwm_wrap();
     u_int16_t duty_cycle = clock_get_duty_cycle();
     u_int8_t timer_type = clock_get_timer_type();
+    u_int8_t mode = clock_get_mode();
 
     char timer_type_str[4];
     if (timer_type) {
@@ -65,12 +66,21 @@ void cmd_info()
         strcpy(timer_type_str, "RPT");
     }
 
+    char mode_str[16];
+    if (mode) {
+        strcpy(mode_str, "Monostable");
+    } else {
+        strcpy(mode_str, "Astable");
+    }
+
     printf(
         "Sys Clock:\t\t%luHz\n"
         "Out Clock:\t\t%luHz\n"
+        "Mode:\t\t\t%s\n"
         "Timer:\t\t\t%s\n",
         sys_clk,
         out_clk,
+        mode_str,
         timer_type_str
     );
 
@@ -129,6 +139,8 @@ void cmd_execute(char *cmd)
     // stop command timer
     cmd_stop();
 
+    char *step_message = "monostable mode press `enter` to step and type `exit` and hit enter to stop...\n\n";
+
     if (strcmp(cmd, "?") == 0) {
         cmd_help();
     } else if (strcmp(cmd, "start") == 0) {
@@ -138,6 +150,9 @@ void cmd_execute(char *cmd)
         clock_pulse_stop();
         printf("clock stopped\n");
     } else if (strcmp(cmd, "step") == 0) {
+        clock_step(true);
+        printf(step_message);
+        cmd_info();
     } else if (strncmp(cmd, "freq", 4) == 0) {
         char *freq = cmd + 5;
         u_int32_t hz = atoi(freq);
@@ -153,8 +168,15 @@ void cmd_execute(char *cmd)
     } else if (strcmp(cmd, "clear") == 0) {
         printf("\033[2J\033[1;1H");
         cmd_boot_message();
+    } else if (strcmp(cmd, "exit") == 0 && clock_get_mode()) {
+        clock_step(false);
+        cmd_info();
     } else {
-        printf("Unknown command\n");
+        if (clock_get_mode()) {
+            clock_step_pulse();
+        } else {
+            printf("unknown command\n");
+        }
     }
     
     // run command timer
@@ -185,7 +207,7 @@ bool cmd_timer_callback(repeating_timer_t *t)
     }
 
     // if character is newline or carriage return
-    if (ch == '\n' || ch == '\r') {
+    if ((ch == '\n' || ch == '\r')) {
         // execute command
         cmd_data->cmd_execute(cmd_buffer);
         // flush command buffer
