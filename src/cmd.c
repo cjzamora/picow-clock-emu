@@ -193,6 +193,7 @@ void cmd_execute(char *cmd)
     } else {
         // if in step mode
         if (clock_get_mode() == CLOCK_MONOSTABLE) {
+            printf("...\n");
             clock_step_pulse();
         } else {
             printf("Unknown command\n");
@@ -223,6 +224,20 @@ bool cmd_timer_callback(repeating_timer_t *t)
 
     // if no character
     if (ch == PICO_ERROR_TIMEOUT) {
+        return true;
+    }
+
+    // if backspace
+    if ((ch == 0x08 || ch == 0x7F)) {
+        // if index is 0, do nothing
+        if (index == 0) {
+            printf(" ");
+            return true;
+        }
+
+        cmd_buffer[--index] = 0;
+        printf(" \b \b");
+
         return true;
     }
 
@@ -270,7 +285,7 @@ void cmd_run()
     // flush input buffer
     cmd_flush();
     // start repeating timer
-    add_repeating_timer_ms(100, cmd_timer_callback, cmd_data, &cmd_timer);
+    add_repeating_timer_ms(50, cmd_timer_callback, cmd_data, &cmd_timer);
 }
 
 /**
