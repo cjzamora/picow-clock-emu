@@ -47,4 +47,4 @@ Feel free to explore the commands by typing `?` and pressing enter. There are tw
 - `PWM` - Pulse Width Modulation Mode used to generate clock frequencies from `10Hz` to `125MHz`
 
 ## Connecting to 6502
-- Connect the CLock PIN to the PHI2 pin of the 6502.
+- Connect the Clock PIN to the PHI2 pin of the 6502.
