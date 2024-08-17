@@ -168,6 +168,20 @@ void clock_set_freq_hz(u_int32_t hz)
 }
 
 /**
+ * Clock set duty cycle
+ * 
+ * @param u_int16_t duty_cycle
+ * @return void
+ */
+void clock_set_duty_cycle(u_int16_t duty_cycle)
+{
+    clock_duty_cycle = duty_cycle;
+
+    clock_pulse_stop();
+    clock_pulse_start();
+}
+
+/**
  * Clock set PWM configuration
  * 
  * @param u_int8_t slice_num
@@ -181,7 +195,7 @@ void clock_set_pwm(u_int8_t slice_num, u_int8_t channel)
 
     pwm_set_clkdiv(slice_num, clock_pwm_div);
     pwm_set_wrap(slice_num, clock_pwm_wrap);
-    pwm_set_chan_level(slice_num, channel, clock_pwm_wrap / 2);
+    pwm_set_chan_level(slice_num, channel, clock_pwm_wrap * clock_duty_cycle / 100);
     pwm_set_enabled(slice_num, true);
 }
 
@@ -251,7 +265,10 @@ void clock_start_rpt()
     gpio_init(PULSE_PIN);
     gpio_set_dir(PULSE_PIN, GPIO_OUT);
 
-    int ms = 1000 / clock_freq_hz;
+    // duty cycle is not supported in repeating timer
+    clock_duty_cycle = 50;
+
+    u_int16_t ms = 1000 / clock_freq_hz;
     if (clock_mode == CLOCK_MONOSTABLE) {
         ms = 50;
     }

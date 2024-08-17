@@ -64,6 +64,14 @@ u_int8_t clock_get_timer_type();
 void clock_set_freq_hz(u_int32_t hz);
 
 /**
+ * Clock set duty cycle
+ * 
+ * @param u_int16_t duty_cycle
+ * @return void
+ */
+void clock_set_duty_cycle(u_int16_t duty_cycle);
+
+/**
  * Clock set PWM div
  * 
  * @param u_int16_t div

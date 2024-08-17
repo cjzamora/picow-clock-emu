@@ -114,6 +114,7 @@ void cmd_help()
         "stop\t\tstops the clock timer\n"
         "step\t\tsteps the clock timer\n"
         "freq <hz>\tsets the clock frequency\n"
+        "duty <percent>\tsets the clock duty cycle\n"
         "reset\t\tresets the clock timer\n"
         "reboot\t\treboots the pico to BOOTSEL mode\n"
         "clear\t\tclears the screen\n"
@@ -169,8 +170,30 @@ void cmd_execute(char *cmd)
         char *freq = cmd + 5;
         u_int32_t hz = atoi(freq);
 
-        clock_set_freq_hz(hz);
-        cmd_info();
+        // limit frequency to 125MHz
+        if (hz > 125000000) {
+            printf("Frequency cannot be greater than 125000000\n");
+        } else {
+            clock_set_freq_hz(hz);
+            cmd_info();
+        }
+
+    // duty command
+    } else if (strncmp(cmd, "duty", 4) == 0) {
+        char *duty = cmd + 5;
+        u_int16_t duty_cycle = atoi(duty);
+        
+        // duty cycle can only be set in PWM mode
+        if (clock_get_timer_type() == CLOCK_TIMER_RPT) {
+            printf("Duty cycle can only be set in PWM mode\n");
+
+        // duty cycle cannot be greater than 100
+        } else if (duty_cycle > 100) {
+            printf("Duty cycle cannot be greater than 100\n");
+        } else {
+            clock_set_duty_cycle(duty_cycle);
+            cmd_info();
+        }
 
     // reset command
     } else if (strcmp(cmd, "reset") == 0) {
